@@ -1,37 +1,52 @@
-# Copilot Instructions for YOUSS
+# Copilot Instructions for YOUSS - Handball93
 
 ## Project Overview
 
-**YOUSS** is an AdonisJS fullstack application combining:
-- **Backend**: TypeScript-based AdonisJS 6 server with authentication, database ORM (Lucid), and session management
-- **Frontend**: Vue 3 with Inertia.js (Server-Side Rendering enabled)
-- **Database**: PostgreSQL with Lucid migrations
+**YOUSS/Handball93** is an AdonisJS fullstack sports news application featuring:
+- **Backend**: TypeScript-based AdonisJS 6 with PostgreSQL, ORM (Lucid), and session management
+- **Frontend**: Vue 3 (Composition API) with Inertia.js (Server-Side Rendering enabled)
+- **Database**: PostgreSQL (Lucid migrations)
+- **Design**: Modern dark theme with Tailwind CSS, glassmorphism effects, and smooth animations
+
+This is a sports news platform for local handball in Seine-Saint-Denis with article management, category filtering, and dynamic content display.
 
 ## Architecture
 
 ### High-Level Data Flow
-1. HTTP requests → AdonisJS middleware stack → authenticated routes → Inertia responses
+1. HTTP requests → AdonisJS middleware stack → controllers → Inertia responses
 2. Browser receives SSR-rendered Vue pages + Inertia props
-3. Subsequent navigation handled client-side via Inertia
-4. Database operations via Lucid ORM models (e.g., `User` model)
+3. Client-side navigation via Inertia (no full page reload)
+4. Database operations via Lucid ORM models (Post, Category, Team)
 
 ### Key Directories & Responsibilities
 
-- **`app/`** - Application logic
-  - `models/` - Lucid ORM models with Auth mixins (`User.ts`)
-  - `middleware/` - HTTP middleware (auth, guest, container bindings)
-  - `exceptions/` - Error handlers
-- **`config/`** - Framework configuration files (app, auth, database, inertia, session, shield)
-- **`start/`** - Bootstrap files
-  - `kernel.ts` - Middleware registration & named middleware exports
-  - `routes.ts` - HTTP route definitions
-  - `env.ts` - Environment variable validation
-- **`inertia/`** - Frontend code
-  - `pages/` - Vue components rendered as pages (home, error pages)
-  - `app/app.ts` - Client entry point
-  - `app/ssr.ts` - Server-side rendering entry point
-- **`database/migrations/`** - Lucid migrations for schema changes
-- **`bin/server.ts`** - HTTP server entry point
+- **`app/models/`** - Lucid ORM models:
+  - `post.ts` - Articles with relationships to categories
+  - `category.ts` - Content categories (Actualité, R1, R2, N3, Équipes, Joueurs, Matchs, Classements)
+  - `team.ts` - Handball teams metadata
+- **`app/controllers/`** - HTTP controllers:
+  - `posts_controller.ts` - Index (home), show (article), category pages
+- **`start/routes.ts`** - Route definitions:
+  - `GET /` → `PostsController.index` (home with featured + all posts)
+  - `GET /posts/:slug` → `PostsController.show` (article detail page)
+  - `GET /category/:slug` → `PostsController.category` (filtered by category)
+- **`inertia/pages/`** - Vue page components:
+  - `home.vue` - Hero + Bento grid + category filter + articles grid
+  - `post/show.vue` - Full article with sidebar (related posts, newsletter CTA)
+  - `category/index.vue` - Category header + filtered articles
+- **`inertia/components/`** - Reusable Vue components:
+  - `navbar.vue` - Sticky blurred navbar with mobile menu
+  - `footer.vue` - Newsletter signup + links + social
+  - `article-card.vue` - Article preview card (used in grids)
+  - `app.vue` (layout) - Root layout wrapping all pages
+- **`inertia/css/app.css`** - Tailwind global styles
+- **`database/migrations/`** - Schema:
+  - `*_create_categories_table.ts` - Categories with color/slug
+  - `*_create_posts_table.ts` - Articles with FK to categories
+  - `*_create_teams_table.ts` - Team metadata
+- **`database/seeders/`** - Initial data:
+  - `01_category_seeder.ts` - 8 handball categories
+  - `02_post_seeder.ts` - 8 realistic handball articles
 
 ### Middleware Pipeline (`start/kernel.ts`)
 
@@ -55,21 +70,31 @@
 ## Critical Patterns
 
 ### Models & Database
-- User model at [app/models/user.ts](app/models/user.ts) uses `withAuthFinder` mixin
-- Primary auth strategy: email/password with scrypt hashing
+- Post model at [app/models/post.ts](app/models/post.ts) has `belongsTo('category')` relationship
+- Category model at [app/models/category.ts](app/models/category.ts) has `hasMany('posts')` relationship
 - Always add `@column()` decorators for Lucid properties
-- Use `@column.dateTime({ autoCreate: true })` for timestamps
+- Use `@column.dateTime({ autoCreate: true })` for auto-timestamps
+- Foreign keys use `@column()` (e.g., `categoryId`)
 
-### Routes & Inertia
-- Routes defined in [start/routes.ts](start/routes.ts) return Inertia responses
-- Use `router.on('/path').renderInertia('ComponentName')` to render Vue components
-- Inertia props passed automatically to Vue via context
-- SSR enabled in [config/inertia.ts](config/inertia.ts)
+### Routes & Controllers
+- Routes defined in [start/routes.ts](start/routes.ts) map to `PostsController` methods
+- Controller methods return `inertia.render('ComponentName', { props })` with data for Vue
+- Props automatically passed to Vue components via Inertia
+- SSR enabled in [config/inertia.ts](config/inertia.ts) for fast initial page loads
 
-### Authentication
-- Access auth via `ctx.auth` in routes/middleware/controllers
-- User model provides `authenticateUsing()` method
-- Middleware redirects unauthenticated requests to `/login`
+### Vue Components & Layouts
+- All pages use `AppLayout` wrapper component ([inertia/layouts/app.vue](inertia/layouts/app.vue))
+- Components support dark theme with Tailwind's `dark:` utilities + inline `bg-slate-900` classes
+- Hero section uses image background with gradient overlays (glassmorphism)
+- Bento grids use asymmetric layouts with `lg:col-span-2 lg:row-span-2` for feature items
+- Article cards use hover effects: `group-hover:scale-110` on images, gradient text on titles
+- Mobile-first responsive design: `grid-cols-1 md:grid-cols-2 lg:grid-cols-3`
+
+### Styling Conventions
+- **Colors**: Orange accents (`from-orange-500 to-red-500`), slate backgrounds (`slate-900`)
+- **Components**: Rounded corners (`rounded-2xl`), glassmorphic borders (`border-white/10`)
+- **Effects**: Smooth transitions (`transition-all duration-300`), hover shadows (`hover:shadow-lg`)
+- **Typography**: Bold headings (`font-bold`), accent links (`text-orange-400`)
 
 ## Development Commands
 

@@ -8,5 +8,9 @@
 */
 
 import router from '@adonisjs/core/services/router'
-router.on('/').renderInertia('home')
+import PostsController from '#controllers/posts_controller'
+
+router.get('/', [PostsController, 'index'])
+router.get('/posts/:slug', [PostsController, 'show'])
+router.get('/category/:slug', [PostsController, 'category'])
 
