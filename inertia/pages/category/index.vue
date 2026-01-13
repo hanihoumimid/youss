@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3'
 import { ArrowLeft } from 'lucide-vue-next'
-import AppLayout from '../layouts/app.vue'
-import ArticleCard from '../components/article-card.vue'
+import AppLayout from '~/layouts/app.vue'
+import ArticleCard from '~/components/article-card.vue'
 
 interface Category {
   id: number
