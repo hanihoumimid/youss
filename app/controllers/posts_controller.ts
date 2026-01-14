@@ -46,6 +46,7 @@ export default class PostsController {
 
     const posts = await Post.query()
       .where('categoryId', category.id)
+      .preload('category')
       .orderBy('publishedAt', 'desc')
 
     const allCategories = await Category.all()
