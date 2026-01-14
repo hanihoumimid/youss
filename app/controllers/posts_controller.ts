@@ -4,10 +4,7 @@ import Category from '#models/category'
 
 export default class PostsController {
   async index({ inertia }: HttpContext) {
-    const posts = await Post.query()
-      .preload('category')
-      .orderBy('publishedAt', 'desc')
-      .limit(12)
+    const posts = await Post.query().preload('category').orderBy('publishedAt', 'desc').limit(12)
 
     const categories = await Category.all()
 
@@ -22,10 +19,7 @@ export default class PostsController {
   }
 
   async show({ params, inertia }: HttpContext) {
-    const post = await Post.query()
-      .where('slug', params.slug)
-      .preload('category')
-      .firstOrFail()
+    const post = await Post.query().where('slug', params.slug).preload('category').firstOrFail()
 
     const relatedPosts = await Post.query()
       .where('categoryId', post.categoryId)
@@ -40,13 +34,9 @@ export default class PostsController {
   }
 
   async category({ params, inertia }: HttpContext) {
-    const category = await Category.query()
-      .where('slug', params.slug)
-      .firstOrFail()
+    const category = await Category.query().where('slug', params.slug).firstOrFail()
 
-    const posts = await Post.query()
-      .where('categoryId', category.id)
-      .orderBy('publishedAt', 'desc')
+    const posts = await Post.query().where('categoryId', category.id).orderBy('publishedAt', 'desc')
 
     const allCategories = await Category.all()
 

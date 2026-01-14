@@ -1,17 +1,17 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
-import type { BelongsTo } from '@adonisjs/lucid/orm'
+import { BaseModel, column, belongsTo, hasMany } from '@adonisjs/lucid/orm'
 import Category from './category.js'
+import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 
 export default class Post extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
   @column()
-  declare title: string
+  declare name: string
 
   @column()
-  declare slug: string
+  declare email: string
 
   @column()
   declare excerpt: string
@@ -42,4 +42,7 @@ export default class Post extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
+
+  @hasMany(() => Post)
+  declare posts: HasMany<typeof Post>
 }

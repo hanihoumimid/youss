@@ -516,5 +516,6 @@ const sidebarPosts = computed(() => props.featured.slice(1, 3))
         <ArticleCard v-for="post in filteredPosts" :key="post.id" :post="post" />
       </div>
     </section>
+  </div>
   </AppLayout>
 </template>
